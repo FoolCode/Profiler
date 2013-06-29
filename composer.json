@@ -9,5 +9,8 @@
     ],
     "require": {
 	"monolog/monolog": "1.5.*"
+    },
+    "autoload": {
+        "psr-0": {"Foolz\\Profiler": "classes/"}
     }
 }

@@ -54,6 +54,15 @@ class Profiler {
     }
 
     /**
+     * Tells if the profiler is logging data
+     * 
+     * @return bool
+     */
+    public function isEnabled() {
+        return $this->enabled;
+    }
+
+    /**
      * Pushes a handler on to the monolog stack.
      * Examples: FirePHPHandler, ChromePHPHandler, RotatingFileHandler...
      *

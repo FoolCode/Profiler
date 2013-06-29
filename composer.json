@@ -8,6 +8,6 @@
         }
     ],
     "require": {
-	"monolog/monolog": "1.6.*@dev"
+	"monolog/monolog": "1.5.*"
     }
 }

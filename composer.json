@@ -1,0 +1,13 @@
+{
+    "name": "foolz/profiler",
+    "description": "monolog-based profiler",
+    "authors": [
+        {
+            "name": "foolz",
+            "email": "support@foolz.us"
+        }
+    ],
+    "require": {
+	"monolog/monolog": "1.6.*@dev"
+    }
+}

@@ -3,6 +3,7 @@
 namespace Foolz\Profiler;
 
 use Monolog\Handler\HandlerInterface;
+use Monolog\Handler\TestHandler;
 use Monolog\Logger;
 
 class Profiler {
@@ -16,9 +17,16 @@ class Profiler {
     /**
      * The instance of the monolog logger
      *
-     * @var \Monolog\Logger
+     * @var Logger
      */
     protected $logger;
+
+    /**
+     * Handler that holds all data so we can output it in html
+     *
+     * @var TestHandler
+     */
+    protected $test_handler;
 
     /**
      * Start time from
@@ -42,6 +50,8 @@ class Profiler {
      */
     public function __construct() {
         $this->logger = new Logger('profiler');
+        $this->test_handler = new TestHandler();
+        $this->logger->pushHandler($this->test_handler);
     }
 
     /**
@@ -55,7 +65,7 @@ class Profiler {
 
     /**
      * Tells if the profiler is logging data
-     * 
+     *
      * @return bool
      */
     public function isEnabled() {
@@ -84,8 +94,7 @@ class Profiler {
      */
     public function enable($start_time = null, $memory_usage = null) {
         $this->enabled = true;
-
-        $this->start_time = $start_time ? : ($_SERVER["REQUEST_TIME_FLOAT"] * 1000);
+        $this->start_time = $start_time ? : ($_SERVER["REQUEST_TIME_FLOAT"] * 10000);
         $this->start_memory_usage = $memory_usage ? : memory_get_usage();
 
         $this->log("Profiling enabled");
@@ -120,7 +129,7 @@ class Profiler {
         if (!$this->enabled) return;
 
         $before = memory_get_usage();
-        unserialize(serialize($variable));
+        $var = unserialize(serialize($variable));
         $after = memory_get_usage();
         $this->log($string, [
                 'memory_variable' => static::formatSize($after - $before),
@@ -138,7 +147,9 @@ class Profiler {
         if (!$this->enabled) return;
 
         $this->timer = static::getTime();
-        $this->log("Start: ".$string, $context);
+        $this->log("Start: ".$string, [
+            'elapsed' => 'start'
+        ] + $context);
     }
 
     /**
@@ -156,15 +167,49 @@ class Profiler {
             ] + $context);
     }
 
+    public function getHtml() {
+        $records = $this->test_handler->getRecords();
+        ob_start();
+        ?>
+            <div style="width:100%; padding:10px 0 20px; background: #f5f5f5;">
+                <div style="width: 80%; margin: 0 auto">
+                    <h4>Profiler</h4>
+                    <p>
+                        <strong>Logged</strong>: <?= count($records) ?> entries.
+                        <strong>Peak memory usage</strong>: <?= static::formatSize(memory_get_peak_usage()) ?>.
+                    </p>
+                    <table style="width: 100%; border: 1px solid #cccccc; line-height: 150%">
+                        <thead style="text-align: left; border-bottom: 1px solid #cccccc">
+                            <?php foreach(['#', 'Message', 'Time', 'Memory', 'Var memory', 'Elapsed'] as $column) : ?>
+                                <th style="border-right: 1px solid #cccccc; padding: 0 5px"><?= $column ?></th>
+                            <?php endforeach; ?>
+                        </thead>
+                        <tbody>
+                            <?php $i = 0; foreach($records as $key => $record) : ?>
+                                <tr style="border-top: 1px solid #cccccc;<?= $key%2 ? 'background:#fbfbfb' : '' ?>">
+                                    <td style="border-right: 1px solid #cccccc; padding: 0 5px"><?= ++$i ?></td>
+                                    <td style="border-right: 1px solid #cccccc; padding: 0 5px"><?= $record['message'] ?></td>
+                                    <?php foreach(['time', 'memory', 'memory_variable', 'elapsed'] as $column) : ?>
+                                        <td style="border-right: 1px solid #cccccc; padding: 0 5px">
+                                            <?= isset($record['context'][$column]) ? $record['context'][$column] : '<span style="color: #dddddd">N/A</span>' ?></td>
+                                    <?php endforeach; ?>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <?php
+        return ob_get_clean();
+    }
+
     /**
      * Returns the current time in milliseconds
      *
      * @return string
      */
     protected static function getTime() {
-        $time = microtime();
-        $time = explode(' ', $time);
-        return $time[1] + $time[0];
+        return microtime(true) * 10000;
     }
 
     /**
@@ -174,15 +219,15 @@ class Profiler {
      * @return string
      */
     protected static function formatTime($time) {
-        if ($time > 100 && $time < 60000) {
+        if ($time > 100000 && $time < 6000000) {
             return sprintf('%02.2f', $time / 1000).'s';
         }
 
-        if ($time > 60000) {
+        if ($time > 6000000) {
             return sprintf('%02.2f', $time / 60000).'m';
         }
 
-        return $time.'ms';
+        return sprintf('%02.2f', $time / 100).'ms';
     }
 
     /**
@@ -191,6 +236,13 @@ class Profiler {
      * @param $size
      */
     protected static function formatSize($size) {
-        return $size;
+        if ($size > 1024 * 1024) {
+            return sprintf('%02.2f', $size / (1024 * 1024)).'mb';
+        }
+
+        if ($size > 1024) {
+            return sprintf('%02.2f', $size / 1024).'kb';
+        }
+        return $size.'b';
     }
 }

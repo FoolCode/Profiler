@@ -16,7 +16,7 @@ Install as any composer package.
 
 You should load the profiler early in your code.
 
-```
+```php
 <?php
 $profiler = new Profiler();
 $profiler->enable();
@@ -24,11 +24,13 @@ $profiler->enable();
 
 Until enable isn't run, no request will be logged. You can setup monolog handlers to have custom output options:
 
-```
+```php
 <?php
 $profiler = new Profiler();
 $profiler->pushHandler(new ChromePHPHandler());
 $profiler->enable();
+
+$profiler->log("Profiler enabled");
 ```
 
 ## HTML output
@@ -40,7 +42,7 @@ You can print the current log at any time with `$profiler->getHtml()`.
 If you use a framework you might have a `$response` variable that handles the data sent to the client.
 To put the profiler at the bottom of the page, you may try something similar to the following.
 
-```
+```php
 <?php
 $content = explode('</body>', $response->getContent());
 if (count($content) == 2) {
@@ -57,6 +59,12 @@ $response->send();
 
 * `getLogger()`
     Returns the Monolog logger so it can be customized
+
+* `enable()`
+    Enables the profiler and prints how much time was elapsed since the start of the script
+
+* `isEnabled()`
+    Tells if the profiler is enabled
 
 * `log($string, $context)`
     Logs elapsed time since the beginning of the script and total memory usage

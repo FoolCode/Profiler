@@ -94,7 +94,7 @@ class Profiler {
      */
     public function enable($start_time = null, $memory_usage = null) {
         $this->enabled = true;
-        $this->start_time = $start_time ? : ($_SERVER["REQUEST_TIME_FLOAT"] * 10000);
+        $this->start_time = $start_time ? : ($_SERVER["REQUEST_TIME_FLOAT"] * 1000);
         $this->start_memory_usage = $memory_usage ? : memory_get_usage();
 
         $this->log("Profiling enabled");
@@ -209,7 +209,7 @@ class Profiler {
      * @return string
      */
     protected static function getTime() {
-        return microtime(true) * 10000;
+        return microtime(true) * 1000;
     }
 
     /**
@@ -219,15 +219,15 @@ class Profiler {
      * @return string
      */
     protected static function formatTime($time) {
-        if ($time > 100000 && $time < 6000000) {
+        if ($time > 1000 && $time < 60000) {
             return sprintf('%02.2f', $time / 1000).'s';
         }
 
-        if ($time > 6000000) {
+        if ($time > 60000) {
             return sprintf('%02.2f', $time / 60000).'m';
         }
 
-        return sprintf('%02.2f', $time / 100).'ms';
+        return sprintf('%02.2f', $time).'ms';
     }
 
     /**

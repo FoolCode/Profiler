@@ -16,14 +16,16 @@ Install as any composer package.
 
 You should load the profiler early in your code.
 
-```<?php
+```
+<?php
 $profiler = new Profiler();
 $profiler->enable();
 ```
 
 Until enable isn't run, no request will be logged. You can setup monolog handlers to have custom output options:
 
-```<?php
+```
+<?php
 $profiler = new Profiler();
 $profiler->pushHandler(new ChromePHPHandler());
 $profiler->enable();
@@ -38,7 +40,8 @@ You can print the current log at any time with `$profiler->getHtml()`.
 If you use a framework you might have a `$response` variable that handles the data sent to the client.
 To put the profiler at the bottom of the page, you may try something similar to the following.
 
-```<?php
+```
+<?php
 $content = explode('</body>', $response->getContent());
 if (count($content) == 2) {
     $response->setContent($content[0].$this->profiler->getHtml().$content[1]);

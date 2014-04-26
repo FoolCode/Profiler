@@ -15,6 +15,13 @@ class Profiler {
     protected $enabled = false;
 
     /**
+     * If the memory checks should
+     *
+     * @var bool
+     */
+    protected $enabled_memory = false;
+
+    /**
      * The instance of the monolog logger
      *
      * @var Logger
@@ -101,6 +108,14 @@ class Profiler {
     }
 
     /**
+     * Enabled object memory profiling, which may have a big performance hit
+     */
+    public function enableMemory()
+    {
+        $this->enabled_memory = true;
+    }
+
+    /**
      * Logs time and memory usage
      *
      * @param string $string A string to identify the entry in the log
@@ -127,6 +142,7 @@ class Profiler {
      */
     public function logMem($string, $variable, $context = []) {
         if (!$this->enabled) return;
+        if (!$this->enabled_memory) return;
 
         $before = memory_get_usage();
         $var = unserialize(serialize($variable));

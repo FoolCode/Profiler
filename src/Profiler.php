@@ -143,7 +143,7 @@ class Profiler {
      * @param array $context   Arbitrary data to log
      */
     public function logMem($string, $variable, $context = []) {
-        if (!$this->enabled && !$this->enabled_memory) {
+        if (!$this->enabled || !$this->enabled_memory) {
             return;
         }
 

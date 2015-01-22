@@ -122,7 +122,9 @@ class Profiler {
      * @param array $context Arbitrary data to log
      */
     public function log($string, $context = []) {
-        if (!$this->enabled) return;
+        if (!$this->enabled) {
+            return;
+        }
 
         $this->logger->info($string, [
                 'time' => static::formatTime(static::getTime() - $this->start_time),
@@ -141,8 +143,9 @@ class Profiler {
      * @param array $context   Arbitrary data to log
      */
     public function logMem($string, $variable, $context = []) {
-        if (!$this->enabled) return;
-        if (!$this->enabled_memory) return;
+        if (!$this->enabled && !$this->enabled_memory) {
+            return;
+        }
 
         $before = memory_get_usage();
         $var = unserialize(serialize($variable));
@@ -160,7 +163,9 @@ class Profiler {
      * @param array $context Arbitrary data to log
      */
     public function logStart($string, $context = []) {
-        if (!$this->enabled) return;
+        if (!$this->enabled) {
+            return;
+        }
 
         $this->timer = static::getTime();
         $this->log("Start: ".$string, [
@@ -175,7 +180,9 @@ class Profiler {
      * @param array $context
      */
     public function logStop($string, $context = []) {
-        if (!$this->enabled) return;
+        if (!$this->enabled) {
+            return;
+        }
 
         $this->log("Stop: ".$string, [
                 'elapsed' => static::formatTime(static::getTime() - $this->timer),
